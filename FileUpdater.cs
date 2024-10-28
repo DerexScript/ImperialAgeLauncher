@@ -9,6 +9,14 @@ namespace ImperialAgeLauncher;
 internal class FileUpdater {
     private static readonly HttpClient httpClient = new HttpClient();
 
+    private static string CalculateMD5(string filePath) {
+        using(var md5 = System.Security.Cryptography.MD5.Create())
+        using(var stream = File.OpenRead(filePath)) {
+            var hash = md5.ComputeHash(stream);
+            return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+        }
+    }
+
     public static async void UpdateFilesAsync(string jsonUrl, ProgressBar progressBar, PictureBox playButton) {
         try {
             // Baixa o JSON contendo as informações dos arquivos
@@ -29,6 +37,16 @@ internal class FileUpdater {
 
                 foreach(var file in filesToUpdate) {
                     string installPath = Path.Combine(baseDir, file.installDir);
+
+                    // Verifica se o arquivo já existe e se a hash coincide
+                    if(File.Exists(installPath)) {
+                        string existingFileHash = CalculateMD5(installPath);
+                        if(existingFileHash==file.hash) {
+                            // Hashes coincidem; pula o download deste arquivo
+                            progressBar.Invoke((Action)(() => progressBar.Value++));
+                            continue;
+                        }
+                    }
 
                     // Cria o diretório, se necessário
                     string directory = Path.GetDirectoryName(installPath);
@@ -64,4 +82,5 @@ public class FileUpdate {
     public string fileUrl { get; set; }
     public string installDir { get; set; }
     public bool update { get; set; }
+    public string hash { get; set; }
 }
