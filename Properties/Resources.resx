@@ -136,13 +136,16 @@
   <data name="website2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\website2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="jogar2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\jogar2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="discord2" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\discord2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="discord1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\discord1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="jogar2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\jogar2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImperialAgeLauncher" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ImperialAgeLauncher.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
