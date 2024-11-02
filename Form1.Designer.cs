@@ -64,6 +64,7 @@
             this.playButton.Image=Properties.Resources.jogar1;
             this.playButton.Name="playButton";
             this.playButton.TabStop=false;
+            this.playButton.Click+=this.PlayButton_Click;
             this.playButton.MouseEnter+=this.PlayButton_MouseEnter;
             this.playButton.MouseLeave+=this.PlayButton_MouseLeave;
             // 

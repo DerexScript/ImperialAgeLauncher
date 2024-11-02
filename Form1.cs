@@ -97,4 +97,9 @@ public partial class Form1 : Form {
     private void DiscordButton_Click(object sender, EventArgs e) {
         Process.Start(new ProcessStartInfo("https://discord.gg/AsY7kv8H") { UseShellExecute=true });
     }
+
+    private async void PlayButton_Click(object sender, EventArgs e) {
+        await Utility.EnsureLauncherSettings();
+        Utility.RunClassicUO(playButton, this);
+    }
 }
