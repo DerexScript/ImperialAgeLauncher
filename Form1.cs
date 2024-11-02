@@ -50,8 +50,8 @@ public partial class Form1 : Form
         playButton.Parent = background;
         websiteButton.Parent = background;
         discordButton.Parent = background;
-        label1.Parent = background;
-        FileUpdater.UpdateFilesAsync("https://imperialage.juvhost.com/data.json", progressBar1, playButton);
+        updateNoticeLabel.Parent = background;
+        FileUpdater.UpdateFilesAsync("https://imperialageshard.com.br/data.json", progressBar1, playButton, updateNoticeLabel);
     }
 
     private void CloseButton_MouseEnter(object sender, EventArgs e)
@@ -67,8 +67,8 @@ public partial class Form1 : Form
     private void CloseButton_Click(object sender, EventArgs e)
     {
         DialogResult result = MessageBox.Show(
-            "Voc� tem certeza que deseja cancelar?",
-            "Confirmar sa�da",
+            "Você tem certeza que deseja cancelar?",
+            "Confirmar saída",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question
         );
@@ -121,11 +121,9 @@ public partial class Form1 : Form
     private async void PlayButton_Click(object sender, EventArgs e)
     {
         await Utility.EnsureLauncherSettings();
+        await Utility.EditClassicUOSettings();
         Utility.RunClassicUO(playButton, this);
     }
 
-    private void label1_Click(object sender, EventArgs e)
-    {
-
-    }
+   
 }

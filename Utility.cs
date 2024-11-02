@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -11,6 +12,103 @@ namespace ImperialAgeLauncher;
 internal static class Utility {
     [DllImport("Gdi32.dll", EntryPoint = "CreateRoundRectRgn")]
     public static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
+
+    public static async Task EditClassicUOSettings() {
+        await Task.Run(() => {
+            try {
+                // Obtém o diretório do executável atual
+                string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string settingsFilePath = Path.Combine(currentDirectory, "ClassicUO", "settings.json");
+
+                // Verifica se o arquivo settings.json existe
+                if(!File.Exists(settingsFilePath)) {
+                    // Se o arquivo não existir, cria com o valor padrão
+                    var defaultSettings = new {
+                        username = "",
+                        password = "",
+                        ip = "login.imperialage.com.br",
+                        port = 2593,
+                        ignore_relay_ip = false,
+                        ultimaonlinedirectory = currentDirectory.TrimEnd('\\'), // Define o diretório do executável sem barra final
+                        profilespath = "",
+                        clientversion = "7.0.91.15",
+                        lang = "IVL",
+                        lastservernum = 1,
+                        last_server_name = "",
+                        fps = 250,
+                        window_position = new { X = 0, Y = 0 },
+                        window_size = new { X = 2560, Y = 1017 },
+                        is_win_maximized = true,
+                        saveaccount = false,
+                        autologin = false,
+                        reconnect = false,
+                        reconnect_time = 1000,
+                        login_music = true,
+                        login_music_volume = 50,
+                        fixed_time_step = true,
+                        run_mouse_in_separate_thread = true,
+                        force_driver = 0,
+                        use_verdata = false,
+                        maps_layouts = (object?)null,
+                        encryption = 0,
+                        plugins = new[] { "Razor\\Razor.exe" }
+                    };
+
+                    // Serializa o valor padrão e cria o arquivo settings.json
+                    string jsonContent = JsonSerializer.Serialize(defaultSettings, new JsonSerializerOptions { WriteIndented=true });
+                    File.WriteAllText(settingsFilePath, jsonContent);
+
+                    // Saída da função após criar o arquivo
+                    return;
+                }
+
+                // Lê o conteúdo do arquivo settings.json
+                string existingJsonContent = File.ReadAllText(settingsFilePath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive=true };
+                var settings = JsonSerializer.Deserialize<Dictionary<string, object>>(existingJsonContent, options);
+
+                if(settings==null) {
+                    MessageBox.Show("Erro ao ler o arquivo settings.json.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Atualiza o atributo ip se necessário
+                if(settings.ContainsKey("ip")&&settings["ip"]?.ToString()!="login.imperialage.com.br") {
+                    settings["ip"]="login.imperialage.com.br";
+                }
+
+                // Atualiza o atributo clientversion se necessário
+                if(settings.ContainsKey("clientversion")&&settings["clientversion"]?.ToString()!="7.0.91.15") {
+                    settings["clientversion"]="7.0.91.15";
+                }
+
+                // Atualiza o atributo ultimaonlinedirectory se necessário
+                if(settings.ContainsKey("ultimaonlinedirectory")&&settings["ultimaonlinedirectory"]?.ToString()!=currentDirectory) {
+                    settings["ultimaonlinedirectory"]=currentDirectory.TrimEnd('\\');
+                }
+
+                // Atualiza o atributo plugins, removendo "ClassicAssist\\ClassicAssist.dll" se existir
+                if(settings.ContainsKey("plugins")&&settings["plugins"] is JsonElement pluginsElement&&pluginsElement.ValueKind==JsonValueKind.Array) {
+                    var pluginsList = JsonSerializer.Deserialize<List<string>>(pluginsElement.GetRawText(), options);
+                    if(pluginsList!=null) {
+                        // Remove "ClassicAssist\\ClassicAssist.dll" se estiver na lista
+                        pluginsList.RemoveAll(p => p=="ClassicAssist\\ClassicAssist.dll");
+
+                        // Atualiza o atributo plugins no settings
+                        settings["plugins"]=pluginsList;
+                    }
+                }
+
+                // Salva as mudanças de volta no arquivo settings.json
+                string updatedJsonContent = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented=true });
+                File.WriteAllText(settingsFilePath, updatedJsonContent);
+
+            } catch(Exception ex) {
+                MessageBox.Show($"Ocorreu um erro ao atualizar o arquivo settings.json: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        });
+    }
+
 
     public static void RunClassicUO(PictureBox playButton, Form mainForm) {
         try {
@@ -35,9 +133,9 @@ internal static class Utility {
             }
 
             // Configura os argumentos
-            string arguments = "-plugin \"Data\\Plugins\\Razor\\Razor.exe\" "+
-                               "-plugin \"Data\\Plugins\\ClassicAssist\\ClassicAssist.dll\" "+
-                               "-ip \"190.2.72.35\" -port \"2593\"";
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string settingsFilePath = Path.Combine(appDataPath, "ClassicUOLauncher", "launcher_settings.xml");
+            string arguments = $"-plugin \"Data\\Plugins\\Razor\\Razor.exe\" -ip \"login.imperialage.com.br\" -port \"2593\" -clientversion \"7.0.91.15\"";
 
             // Configura o processo
             var processStartInfo = new ProcessStartInfo {
@@ -77,8 +175,8 @@ internal static class Utility {
             string launcherDirectory = Path.Combine(appDataPath, "ClassicUOLauncher");
             string settingsFilePath = Path.Combine(launcherDirectory, "launcher_settings.xml");
 
-            // Obtém o diretório do executável (diretório do Ultima Online)
-            string installDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            // Obtém o diretório do executável (diretório do Ultima Online) sem a barra final
+            string installDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\');
 
             // Verifica se o diretório existe, se não cria o diretório
             if(!Directory.Exists(launcherDirectory)) {
@@ -99,37 +197,33 @@ internal static class Utility {
 
                 if(profiles!=null) {
                     foreach(var profile in profiles.Elements("profile")) {
-                        if(((string?)profile.Attribute("server")??"")=="190.2.72.35") {
+                        string serverAttribute = (string?)profile.Attribute("server")??"";
+                        // Se o atributo server tiver o valor "190.2.72.35", altera para "login.imperialage.com.br"
+                        if(serverAttribute=="190.2.72.35") {
+                            profile.SetAttributeValue("server", "login.imperialage.com.br");
+                            serverAttribute="login.imperialage.com.br"; // Atualiza o valor para a próxima verificação
+                        }
+
+                        if(serverAttribute=="login.imperialage.com.br") {
                             profileExists=true;
 
-                            // Verifica se os plugins estão configurados corretamente
+                            // Verifica se o atributo client_version está vazio ou diferente de "7.0.91.15"
+                            var clientVersionAttribute = profile.Attribute("client_version");
+                            if(clientVersionAttribute==null||string.IsNullOrWhiteSpace(clientVersionAttribute.Value)||clientVersionAttribute.Value!="7.0.91.15") {
+                                profile.SetAttributeValue("client_version", "7.0.91.15");
+                            }
+
+                            // Verifica se o elemento "plugins" existe
                             var pluginsElement = profile.Element("plugins");
-                            if(pluginsElement==null) {
-                                // Se não existir o elemento "plugins", cria e adiciona
-                                pluginsElement=new XElement("plugins");
-                                profile.Add(pluginsElement);
-                            }
+                            if(pluginsElement!=null) {
+                                // Verifica se o plugin "ClassicAssist\ClassicAssist.dll" existe
+                                var classicAssistPlugin = pluginsElement.Elements("plugin")
+                                    .FirstOrDefault(p => (string?)p.Attribute("path")=="ClassicAssist\\ClassicAssist.dll");
 
-                            // Verifica se os plugins "ClassicAssist.dll" e "Razor.exe" estão presentes
-                            bool classicAssistExists = pluginsElement.Elements("plugin")
-                                .Any(p => (string?)p.Attribute("path")=="ClassicAssist\\ClassicAssist.dll"&&
-                                          (string?)p.Attribute("enabled")=="True");
-
-                            bool razorExists = pluginsElement.Elements("plugin")
-                                .Any(p => (string?)p.Attribute("path")=="Razor\\Razor.exe"&&
-                                          (string?)p.Attribute("enabled")=="True");
-
-                            // Adiciona ou corrige os plugins se necessário
-                            if(!classicAssistExists) {
-                                pluginsElement.Add(new XElement("plugin",
-                                    new XAttribute("path", "ClassicAssist\\ClassicAssist.dll"),
-                                    new XAttribute("enabled", "True")));
-                            }
-
-                            if(!razorExists) {
-                                pluginsElement.Add(new XElement("plugin",
-                                    new XAttribute("path", "Razor\\Razor.exe"),
-                                    new XAttribute("enabled", "True")));
+                                if(classicAssistPlugin!=null) {
+                                    // Remove o plugin
+                                    classicAssistPlugin.Remove();
+                                }
                             }
 
                             break;
@@ -171,10 +265,10 @@ internal static class Utility {
             new XAttribute("cuo_path", ""),
             new XAttribute("username", ""),
             new XAttribute("password", ""),
-            new XAttribute("server", "190.2.72.35"),
+            new XAttribute("server", "login.imperialage.com.br"),
             new XAttribute("port", "2593"),
             new XAttribute("charname", ""),
-            new XAttribute("client_version", ""),
+            new XAttribute("client_version", "7.0.91.15"),
             new XAttribute("uo_protocol", "0"),
             new XAttribute("uopath", installDirectory),
             new XAttribute("server_type", "0"),
@@ -199,13 +293,15 @@ internal static class Utility {
                 new XElement("plugin",
                     new XAttribute("path", "Razor\\Razor.exe"),
                     new XAttribute("enabled", "True")
-                ),
+                )/*,
                 new XElement("plugin",
                     new XAttribute("path", "ClassicAssist\\ClassicAssist.dll"),
-                    new XAttribute("enabled", "True")
+                    new XAttribute("enabled", "False") // Define o valor padrão como "False"
                 )
+                */
             )
         );
     }
+
 
 }

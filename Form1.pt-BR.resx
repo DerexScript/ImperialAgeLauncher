@@ -168,16 +168,19 @@
   <data name="progressBar1.Size" type="System.Drawing.Size, System.Drawing">
     <value>435, 23</value>
   </data>
-  <data name="label1.AutoSize" type="System.Boolean, mscorlib">
+  <data name="progressBar1.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="updateNoticeLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>134, 339</value>
+  <data name="updateNoticeLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>274, 304</value>
   </data>
-  <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="updateNoticeLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>145, 15</value>
   </data>
-  <data name="label1.Text" xml:space="preserve">
+  <data name="updateNoticeLabel.Text" xml:space="preserve">
     <value>Procurando atualizações...</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">

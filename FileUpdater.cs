@@ -16,7 +16,7 @@ internal class FileUpdater {
         return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
     }
 
-    public static async void UpdateFilesAsync(string jsonUrl, ProgressBar progressBar, PictureBox playButton) {
+    public static async void UpdateFilesAsync(string jsonUrl, ProgressBar progressBar, PictureBox playButton, Label updateNoticeLabel) {
         try {
             // Baixa o JSON contendo as informações dos arquivos
             string json = await httpClient.GetStringAsync(jsonUrl);
@@ -41,6 +41,8 @@ internal class FileUpdater {
                             continue;
                         }
                     }
+                    progressBar.Visible=true;
+                    updateNoticeLabel.Text="Baixando atualizações...";
                     // Cria o diretório, se necessário
                     string directory = Path.GetDirectoryName(installPath)??string.Empty;
                     if(!String.IsNullOrEmpty(directory)) {
@@ -64,6 +66,7 @@ internal class FileUpdater {
         } finally {
             progressBar.Visible=false;
             playButton.Visible=true;
+            updateNoticeLabel.Visible=false;
         }
     }
 }
